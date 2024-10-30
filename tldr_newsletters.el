@@ -1,10 +1,10 @@
 ;;; tldr-newsletters.el --- Display TLDR newsletters -*- lexical-binding: t -*-
 
-;; Author: Sebastien Bariteau
+;; Author: numkem
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "27.1") (json "1.5"))
 ;; Keywords: mail, news
-;; URL: https://github.com/numkem/tldr-newsletters
+;; URL: https://github.com/numkem/elipses/tldr_newsletters.el
 
 ;;; Commentary:
 ;; Display TLDR newsletters with a date and subject fields
