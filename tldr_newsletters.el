@@ -24,6 +24,7 @@
   :group 'tldr-newsletters)
 
 (defconst tldr-opentrashmail-all-mail-endpoint "/json/")
+(defconst tldr-opentrashmail-delete-endpoint "/api/delete/")
 
 (defcustom tldr-opentrashmail-email-address "tldr@news.numkem.org"
   "Email address that contains all the newsletters in OpenTrashMail"
@@ -37,6 +38,9 @@
 
 (defun tldr-newsletters-opentrashmail--api-url ()
   (format "%s%s%s" tldr-newsletters-opentrashmail-base-url tldr-opentrashmail-all-mail-endpoint tldr-opentrashmail-email-address))
+
+(defun tldr-newsletters-opentrashmail--delete-url (email-id)
+  (format "%s%s%s/%s" tldr-newsletters-opentrashmail-base-url tldr-opentrashmail-delete-endpoint tldr-opentrashmail-email-address email-id))
 
 (defvar tldr-newsletters-data nil
   "Holds the parsed newsletter JSON data.")
@@ -107,12 +111,28 @@
     (replace-match ""))
   (goto-char (point-min)))
 
+(defun tldr-newsletters--delete-callback (_status)
+  (message "Email deleted"))
+
+(defun tldr-newsletters-delete-email (email)
+  (let ((email-id (tldr-email-id email))
+        (url-request-method "GET")
+        (url-request-extra-headers
+         '(("Content-Type" . "application/json"))))
+    (url-retrieve (tldr-newsletters-opentrashmail--delete-url email-id) #'tldr-newsletters--delete-callback nil t t)))
+
 ;;;###autoload
 (defun tldr-newsletters ()
   "Display TLDR newsletters."
   (interactive)
   (tldr-newsletters-fetch)
   (tldr-newsletters-display-email (tldr-newsletters-menu)))
+
+(defun tldr-newsletters-pick-delete-email()
+  "Display all the newsletters and pick one to delete"
+  (interactive)
+  (tldr-newsletters-fetch)
+  (tldr-newsletters-delete-email (tldr-newsletters-menu)))
 
 (provide 'tldr-newsletters)
 ;;; tldr-newsletters.el ends here
