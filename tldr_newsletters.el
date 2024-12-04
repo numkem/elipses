@@ -136,6 +136,16 @@
          '(("Content-Type" . "application/json"))))
     (url-retrieve (tldr-newsletters-opentrashmail--delete-url email-id) #'tldr-newsletters--delete-callback nil t t)))
 
+(defun tldr-newsletters-find-link-by-number (number)
+  (goto-char (point-max))
+  (search-backward (format "[%d]" number)))
+
+(defun tldr-newsletters-pick-link ()
+  "Ask the link number and jump to it"
+  (interactive)
+  (let ((link-number (read-number "Link number: ")))
+    (tldr-newsletters-find-link-by-number link-number)))
+
 ;;;###autoload
 (defun tldr-newsletters ()
   "Display TLDR newsletters."
@@ -157,7 +167,8 @@
 
 (map! :map tldr-newsletters-mode-map
       :localleader
-      :desc "Delete current email" :n "d" #'tldr-newsletters-delete-current-email)
+      :desc "Delete current email" "d" #'tldr-newsletters-delete-current-email
+      :desc "Goto link number" "l" #'tldr-newsletters-pick-link)
 
 (provide 'tldr-newsletters)
 ;;; tldr-newsletters.el ends here
