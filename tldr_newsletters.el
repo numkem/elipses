@@ -18,7 +18,7 @@
   "Settings for tldr-newsletters."
   :group 'mail)
 
-(defcustom tldr-newsletters-opentrashmail-base-url "http://trashmail.svc.numkem.int"
+(defcustom tldr-newsletters-opentrashmail-base-url ""
   "URL for the TLDR newsletters API."
   :type 'string
   :group 'tldr-newsletters)
@@ -26,7 +26,7 @@
 (defconst tldr-newsletters-opentrashmail-all-mail-endpoint "/json/")
 (defconst tldr-newsletters-opentrashmail-delete-endpoint "/api/delete/")
 
-(defcustom tldr-newsletters-opentrashmail-email-address "tldr@news.numkem.org"
+(defcustom tldr-newsletters-opentrashmail-email-address ""
   "Email address that contains all the newsletters in OpenTrashMail"
   :type 'string
   :group 'tldr-newsletters)
