@@ -3,12 +3,12 @@
 ;; Author: numkem
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "27.1") (json "1.5"))
-;; Keywords: mail, news
-;; URL: https://github.com/numkem/elipses/tldr_newsletters.el
+;; Keywords: news
+;; URL: https://github.com/numkem/elipses
 
 ;;; Commentary:
 ;; Display TLDR newsletters with a date and subject fields
-;; Once selected, creates a new buffer with all the content of the email in it rendered in html
+;; Once selected, creates a new buffer with all the content of the email in it
 
 ;;; Code:
 (require 'json)
