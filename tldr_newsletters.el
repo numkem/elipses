@@ -23,10 +23,10 @@
   :type 'string
   :group 'tldr-newsletters)
 
-(defconst tldr-opentrashmail-all-mail-endpoint "/json/")
-(defconst tldr-opentrashmail-delete-endpoint "/api/delete/")
+(defconst tldr-newsletters-opentrashmail-all-mail-endpoint "/json/")
+(defconst tldr-newsletters-opentrashmail-delete-endpoint "/api/delete/")
 
-(defcustom tldr-opentrashmail-email-address "tldr@news.numkem.org"
+(defcustom tldr-newsletters-opentrashmail-email-address "tldr@news.numkem.org"
   "Email address that contains all the newsletters in OpenTrashMail"
   :type 'string
   :group 'tldr-newsletters)
@@ -36,16 +36,19 @@
   :type 'string
   :group 'tldr-newsletters)
 
+(defvar tldr-newsletters-mode-map (make-sparse-keymap)
+  "Keymap for tldr-newsletter-mode.")
+
 (defun tldr-newsletters-opentrashmail--api-url ()
-  (format "%s%s%s" tldr-newsletters-opentrashmail-base-url tldr-opentrashmail-all-mail-endpoint tldr-opentrashmail-email-address))
+  (format "%s%s%s" tldr-newsletters-opentrashmail-base-url tldr-newsletters-opentrashmail-all-mail-endpoint tldr-newsletters-opentrashmail-email-address))
 
 (defun tldr-newsletters-opentrashmail--delete-url (email-id)
-  (format "%s%s%s/%s" tldr-newsletters-opentrashmail-base-url tldr-opentrashmail-delete-endpoint tldr-opentrashmail-email-address email-id))
+  (format "%s%s%s/%s" tldr-newsletters-opentrashmail-base-url tldr-newsletters-opentrashmail-delete-endpoint tldr-newsletters-opentrashmail-email-address email-id))
 
 (defvar tldr-newsletters-data nil
   "Holds the parsed newsletter JSON data.")
 
-(defclass tldr-newsletter-email ()
+(defclass tldr-newsletters-email ()
   ((id :initarg :id :accessor tldr-email-id)
    (timestamp :initarg :timestamp :accessor tldr-email-timestamp)
    (from :initarg :from :accessor tldr-email-from)
@@ -94,14 +97,18 @@
 
 (defun tldr-newsletters-parse-email (raw-email timestamp)
   "Received an email representation as an hashtable and returns an email object"
-  (tldr-newsletter-email :id (gethash "id" raw-email)
-                         :body (gethash "body" raw-email)
-                         :from (gethash "from" raw-email)
-                         :subject (gethash "subject" raw-email)
-                         :timestamp timestamp))
+  (tldr-newsletters-email :id (gethash "id" raw-email)
+                          :body (gethash "body" raw-email)
+                          :from (gethash "from" raw-email)
+                          :subject (gethash "subject" raw-email)
+                          :timestamp timestamp))
 
 (defun tldr-newsletters-display-email (email)
+  "Fill in the buffer with EMAIL content.
+   Sets the buffer to readonly and activate the minor mode"
   (switch-to-buffer (get-buffer-create (format "*TLDR Newsletter %s*" (tldr-email-timestamp email))))
+  (tldr-newsletters-mode 1)
+  (insert (format "ID: %s\n" (tldr-email-id email)))
   (insert (format "Date: %s\n" (tldr-email-timestamp email)))
   (insert (format "Subject: %s\n" (tldr-email-subject email)))
   (insert "-----\n")
@@ -109,10 +116,27 @@
   (goto-char (point-min))
   (while (re-search-forward "\r" nil t)
     (replace-match ""))
-  (goto-char (point-min)))
+  (goto-char (point-min))
+  (read-only-mode 1))
 
 (defun tldr-newsletters--delete-callback (_status)
   (message "Email deleted"))
+
+(defun tldr-newsletters-find-id ()
+  "Find the ID in the current buffer."
+  (interactive)
+  (goto-char (point-min))
+  (when (re-search-forward "ID: \\([^\n]+\\)" nil t)
+    (let ((id (match-string 1)))
+      (message "Found ID: %s" id)
+      id)))
+
+(defun tldr-newsletters-delete-current-email ()
+  (interactive)
+  (goto-char (point-min))
+  (when (re-search-forward "ID: \\([^\n]+\\)" nil t)
+    (let ((id (match-string 1)))
+      (tldr-newsletters-delete-email (make-instance 'tldr-newsletters-email :id id)))))
 
 (defun tldr-newsletters-delete-email (email)
   (let ((email-id (tldr-email-id email))
@@ -133,6 +157,16 @@
   (interactive)
   (tldr-newsletters-fetch)
   (tldr-newsletters-delete-email (tldr-newsletters-menu)))
+
+(define-minor-mode tldr-newsletters-mode
+  "Toggle tldr-newsletters mode.
+  This is essentially to allow binding of local leader keys"
+  :lighter "tldr-newsletters-mode"
+  :keymap tldr-newsletters-mode-map)
+
+(map! :map tldr-newsletters-mode-map
+      :localleader
+      :desc "Delete current email" :n "d" #'tldr-newsletters-delete-current-email)
 
 (provide 'tldr-newsletters)
 ;;; tldr-newsletters.el ends here
