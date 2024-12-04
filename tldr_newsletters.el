@@ -122,15 +122,6 @@
 (defun tldr-newsletters--delete-callback (_status)
   (message "Email deleted"))
 
-(defun tldr-newsletters-find-id ()
-  "Find the ID in the current buffer."
-  (interactive)
-  (goto-char (point-min))
-  (when (re-search-forward "ID: \\([^\n]+\\)" nil t)
-    (let ((id (match-string 1)))
-      (message "Found ID: %s" id)
-      id)))
-
 (defun tldr-newsletters-delete-current-email ()
   (interactive)
   (goto-char (point-min))
